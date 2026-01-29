@@ -38,6 +38,33 @@ def Get_User(request):
     serializer = userserializer(query, many=True)
     return Response(serializer.data) 
 
+@api_view(['DELETE']) 
+@permission_classes([IsAdminUser])
+def Delete_User(request, pk):
+    query = User.objects.get(id=pk)
+    query.delete()
+    return Response('user deleted') 
+
+@api_view(['GET','PUT']) 
+@permission_classes([IsAdminUser])
+def Admin_Update_User(request, pk):
+    try:
+        user = User.objects.get(id=pk)
+    except User.DoesNotExist:
+        return Response(status=404) \
+    
+    if request.method == 'PUT':
+        serializer = userserializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    
+    serializer = userserializer(user)
+    return Response(serializer.data)
+
+
+
 @api_view(['GET','POST']) 
 @permission_classes([IsAuthenticated])
 def Get_User_Profile(request):
@@ -59,6 +86,7 @@ def Update_User_Profile(request):
     user.save()
     
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def registerUser(request):
