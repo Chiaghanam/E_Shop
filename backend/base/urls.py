@@ -1,13 +1,16 @@
 from django.urls import path
 from . import views
-from .views import CustomTokenObtainPairView, Get_User, Get_User_Profile, Update_User_Profile, registerUser, addOrderItems, orderProfile, updateOrderToPay, getMyOrder, Delete_User,Admin_Update_User
+from .views import CustomTokenObtainPairView, Get_User, Get_User_Profile, Update_User_Profile, registerUser, addOrderItems, orderProfile, updateOrderToPay, getMyOrder, Delete_User,Admin_Update_User, product_delete, getOrder
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
 
 urlpatterns = [
     path('home/', views.homeview, name='home'),
+    path('product/create/', views.product_create, name='product_create'),
+    path('product/edit/<int:pk>/', views.product_edit, name='product_edit'),
     path('productDetail/<int:pk>/', views.product_detail_view, name='product_detail'),
+    
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
@@ -18,10 +21,14 @@ urlpatterns = [
     
     path('orders/add/', addOrderItems, name='orders-add'),
     path('myorders/', getMyOrder, name='My_Orders'),
+    path('orders/', getOrder, name='Orders'),
     
     path('users/delete/<int:pk>/', Delete_User, name='users-delete'),
     path('users/update/<int:pk>/',Admin_Update_User, name='users-update'),
+    
     path('orders/<str:pk>/',orderProfile, name='user-orders'),    
-    path('orders/<str:pk>/pay', updateOrderToPay, name='pay'),    
+    path('orders/<str:pk>/pay', updateOrderToPay, name='pay'),  
+    
+    path ('product/delete/<int:pk>/', product_delete, name='product-delete'), 
 
 ]

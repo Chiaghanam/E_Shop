@@ -11,7 +11,7 @@ from .serializer import CustomTokenObtainPairSerializer, userserializer, userser
 from django.contrib.auth.models import User
 from rest_framework import status
 from datetime import datetime
-
+from decimal import Decimal
 
 
 
@@ -31,6 +31,80 @@ def product_detail_view(request, pk):
     serializer = productserializer(product)
     return Response(serializer.data)
 
+@permission_classes(IsAdminUser)
+@api_view(['DELETE'])
+def product_delete(request, pk):
+    product = Product.objects.get(_id=pk)
+    product.delete()
+    return Response('product deleted successfully')
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def product_create(request):
+    user = request.user
+    data = request.data
+    image = request.FILES.get('image')
+
+    required_fields = ['name', 'brand', 'category', 'description', 'price', 'countInStock']
+    for field in required_fields:
+        if field not in data:
+            return Response({"detail": f"{field} is required."}, status=400)
+
+    if not image:
+        return Response({"detail": "image is required."}, status=400)
+
+    try:
+        # Convert price to Decimal safely
+        price = Decimal(str(data['price']))
+
+        product = Product.objects.create(
+            user=user,
+            name=data['name'],
+            brand=data['brand'],
+            category=data['category'],
+            description=data['description'],
+            price=price,
+            countInStock=data['countInStock'],
+            image=image,
+        )
+        serializer = productserializer(product, many=False)
+        return Response(serializer.data)
+    except Exception as e:
+        import traceback
+        print("Error creating product:", e)
+        traceback.print_exc()
+        return Response({"detail": str(e)}, status=500)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def product_edit(request, pk):
+    user = request.user
+    data = request.data
+
+    try:
+        product = Product.objects.get(pk=pk)
+
+        product.user = user
+        product.name = data.get('name', product.name)
+        product.brand = data.get('brand', product.brand)
+        product.category = data.get('category', product.category)
+        product.description = data.get('description', product.description)
+        product.price = Decimal(str(data.get('price', product.price)))
+        product.countInStock = data.get('countInStock', product.countInStock)
+
+        if 'image' in request.FILES:
+            product.image = request.FILES['image']
+
+        product.save()
+        serializer = productserializer(product, many=False)
+        return Response(serializer.data)
+
+    except Product.DoesNotExist:
+        return Response({"detail": "Product not found."}, status=404)
+    except Exception as e:
+        return Response({"detail": str(e)}, status=500)
+    
 @api_view(['GET','POST']) 
 @permission_classes([IsAdminUser])
 def Get_User(request):
@@ -182,5 +256,12 @@ def updateOrderToPay(request, pk):
 def getMyOrder(request):
     user = request.user
     orders = user.order_set.all()
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)
+
+@permission_classes([IsAdminUser])
+@api_view(['GET'])
+def getOrder(request):
+    orders = Order.objects.all()
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)

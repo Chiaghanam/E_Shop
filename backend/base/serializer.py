@@ -56,6 +56,15 @@ class productserializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+    def validate_price(self, value):
+        if value is None:
+            raise serializers.ValidationError("Price is required.")
+        if value < 0:
+            raise serializers.ValidationError("Price cannot be negative.")
+        if len(str(value).split('.')[0]) > 5:
+            raise serializers.ValidationError("Price exceeds the maximum allowed digits.")
+        return value
         
 class orderitemserializer(serializers.ModelSerializer):
     class Meta:
