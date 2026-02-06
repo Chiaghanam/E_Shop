@@ -20,11 +20,11 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 
-@api_view(['GET','POST']) 
+@api_view(['GET']) 
 def homeview(request):
-    query = request.query_params.get('query', '')
+    query = request.query_params.get('query')
     print(query)
-    if query == None:
+    if query == None or query == 'null':
         query = ''
     product = Product.objects.filter(name__icontains=query)
     serializer = productserializer(product, many=True)
@@ -108,6 +108,12 @@ def product_edit(request, pk):
         return Response({"detail": "Product not found."}, status=404)
     except Exception as e:
         return Response({"detail": str(e)}, status=500)
+    
+@api_view(['GET'])
+def getTopProducts(request):
+    products = Product.objects.filter(rating__gte=4).order_by('-rating')[0:5]
+    serializer = productserializer(products, many=True)
+    return Response(serializer.data)    
     
 @api_view(['GET','POST']) 
 @permission_classes([IsAdminUser])
