@@ -22,8 +22,12 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 @api_view(['GET','POST']) 
 def homeview(request):
-    query = Product.objects.all()
-    serializer = productserializer(query, many=True)
+    query = request.query_params.get('query', '')
+    print(query)
+    if query == None:
+        query = ''
+    product = Product.objects.filter(name__icontains=query)
+    serializer = productserializer(product, many=True)
     return Response(serializer.data) 
 @api_view(['GET','POST'])
 def product_detail_view(request, pk):
