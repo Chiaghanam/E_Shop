@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, OrderItem, Order, ShippingAddress
+from .models import Product, OrderItem, Order, Review, ShippingAddress
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -50,12 +50,22 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return data
 
-
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
+    
 
 class productserializer(serializers.ModelSerializer):
+    Review = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_Review(self, obj):
+        reviews = obj.review_set.all()
+        serializer = ReviewSerializer(reviews, many=True)
+        return serializer.data
 
     def validate_price(self, value):
         if value is None:
@@ -104,3 +114,4 @@ class OrderSerializer(serializers.ModelSerializer):
         user = obj.user
         serializer = userserializer(user, many=False)
         return serializer.data
+

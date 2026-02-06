@@ -2,12 +2,12 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from .models import Product, Order, OrderItem, ShippingAddress
+from .models import Product, Order, OrderItem, ShippingAddress, Review
 from .serializer import productserializer 
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializer import CustomTokenObtainPairSerializer, userserializer, userserializertoken, OrderSerializer, productserializer,  orderitemserializer, shippingaddressserializer
+from .serializer import CustomTokenObtainPairSerializer, userserializer, userserializertoken, OrderSerializer, productserializer, ReviewSerializer,  orderitemserializer, shippingaddressserializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from datetime import datetime
@@ -265,3 +265,47 @@ def getOrder(request):
     orders = Order.objects.all()
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
+
+@permission_classes([IsAdminUser])
+@api_view(['PUT'])
+def deliveredOrder(request, pk):
+    orders = Order.objects.get(_id=pk)
+    orders.isDelivered = True
+    orders.delieveredAt = datetime.now()
+    orders.save()
+    serializer = OrderSerializer(orders, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createProductReview(request, pk):
+    user = request.user
+    product = Product.objects.get(_id=pk)
+    data = request.data
+
+    if product.review_set.filter(user=user).exists():
+        message = {'detail': 'Product already reviewed'}
+        return Response(message, status=status.HTTP_400_BAD_REQUEST)
+    
+    # elif data['rating'] == 0:
+    #     message = {'detail': 'Please select a rating'}
+    #     return Response(message, status=status.HTTP_400_BAD_REQUEST)
+    
+    else:
+        Review.objects.create(
+            user=user,
+            Product=product,
+            name= user.username,
+            rating=data['rating'],
+            comment=data['comment']
+        )
+        reviews = product.review_set.all()
+        product.numReviews = len(reviews)
+        total = 0
+        for i in reviews:
+            total += i.rating
+        product.rating = total / len(reviews)
+        product.save()
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data)

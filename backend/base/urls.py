@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import CustomTokenObtainPairView, Get_User, Get_User_Profile, Update_User_Profile, registerUser, addOrderItems, orderProfile, updateOrderToPay, getMyOrder, Delete_User,Admin_Update_User, product_delete, getOrder
+from .views import CustomTokenObtainPairView, Get_User, Get_User_Profile, Update_User_Profile, createProductReview, registerUser, addOrderItems, orderProfile, updateOrderToPay, getMyOrder, Delete_User,Admin_Update_User, product_delete, getOrder, deliveredOrder
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -27,8 +27,11 @@ urlpatterns = [
     path('users/update/<int:pk>/',Admin_Update_User, name='users-update'),
     
     path('orders/<str:pk>/',orderProfile, name='user-orders'),    
-    path('orders/<str:pk>/pay', updateOrderToPay, name='pay'),  
+    path('orders/<str:pk>/pay', updateOrderToPay, name='pay'),
+    path('orders/<str:pk>/delivered', deliveredOrder, name='delivered'),
+      
     
     path ('product/delete/<int:pk>/', product_delete, name='product-delete'), 
+    path ('product/<int:pk>/review/', createProductReview, name='product-review'), 
 
 ]
