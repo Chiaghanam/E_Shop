@@ -15,7 +15,7 @@ class userserializer(serializers.ModelSerializer):
     def get_name(self, obj):
         name = obj.username
         if name == '':
-            name = obj.email
+            name = obj.first_name
         return name    
       
     def get__id(self, obj):
@@ -30,8 +30,8 @@ class userserializertoken(serializers.ModelSerializer):
         
     def get_name(self, obj):
         name = obj.username
-        if name == '':
-            name = obj.email
+        if not name or name == None or name == '':
+            name = obj.first_name
         return name    
       
     def get__id(self, obj):
