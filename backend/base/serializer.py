@@ -58,9 +58,16 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class productserializer(serializers.ModelSerializer):
     Review = serializers.SerializerMethodField(read_only=True)
+    image = serializers.SerializerMethodField()  # ADD THIS
+
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_image(self, obj):  
+        if obj.image:
+            return obj.image.url  
+        return None
 
     def get_Review(self, obj):
         reviews = obj.review_set.all()
@@ -77,9 +84,16 @@ class productserializer(serializers.ModelSerializer):
         return value
         
 class orderitemserializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    
     class Meta:
         model = OrderItem
         fields = '__all__'
+    
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
   
 class shippingaddressserializer(serializers.ModelSerializer):
     class Meta:
