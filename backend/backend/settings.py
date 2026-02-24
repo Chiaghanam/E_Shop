@@ -123,7 +123,6 @@ USE_TZ = True
 # -------------------------------------------------------
 # AWS S3 Configuration
 # -------------------------------------------------------
-
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = "amobi-eshop-bucket"
@@ -134,41 +133,29 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
-
-# S3 URL for accessing files
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+AWS_LOCATION = ""
+AWS_DEFAULT_ACL = None
 
+# Static files — always served by Whitenoise
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+STATICFILES_DIRS = []
+front_static = os.path.join(BASE_DIR, 'front/build/static')
+if os.path.exists(front_static):
+    STATICFILES_DIRS = [front_static]
 
-# Only use S3 when not in debug/development mode
-if not DEBUG:
-    # S3 Static files
-    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
-else:
-    # Local static files for development
-    STATIC_URL = '/static/'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# Always use S3 for media/uploaded files
+# Media files — always served by S3
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-AWS_LOCATION = ""
-AWS_DEFAULT_ACL = None
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'front/build/static'),
-]
 
 CORS_ALLOW_ALL_ORIGINS = True
-
-# static files for whitenoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
