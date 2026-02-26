@@ -9,7 +9,7 @@ export const fetchUserInfo = createAsyncThunk(
   async ({ username, password }, thunkAPI) => {
     try {
       console.log('Attempting login with:', { username, password });
-      const response = await axios.post(PROXY + '/api/token/', { username, password });
+      const response = await axios.post(PROXY + '/token/', { username, password });
       console.log('Full Login response:', response.data);
       console.log('Token fields in response:', {
         access: response.data.access,
