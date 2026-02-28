@@ -43,7 +43,7 @@ const Home = () => {
           ) : (
             <div className="row">
               {data && data.map((product) => (
-                <div  className="col-md-4 mb-4">
+                <div  className="col-md-4 mb-4 col-sm-6" >
                   <Link key={product._id} to={`/product/${product._id}`}>
                   <div className="card" >
                     <img src={product.image} className="card-img-top" alt={product.name} />
