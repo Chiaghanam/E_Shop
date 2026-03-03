@@ -42,22 +42,20 @@ const Home = () => {
             <p>Error: {error}</p>
           ) : (
             <div className="row">
-              {data && data.map((product) => (
-                <div  className="col-md-4 mb-4 col-sm-6" >
-                  <Link key={product._id} to={`/product/${product._id}`}>
-                  <div className="card" >
-                    <img src={product.image} className="card-img-top" alt={product.name} />
-                    {/* {console.log(product.image)} */}
-                    <div className="card-body">
-                      <h5 className="card-title">{product.name}</h5>
-                      <StarRating rating={product.rating} />
-                      {/* <p className="card-text">{product.description}</p> */}
-                      <p className="card-text">Price: ₦{product.price}</p>
-                    </div>
+                {data && data.map((product) => (
+                  <div key={product._id} className="col-6 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <Link to={`/product/${product._id}`}>
+                      <div className="card">
+                        <img src={product.image} className="card-img-top" alt={product.name} />
+                        <div className="card-body">
+                          <h5 className="card-title">{product.name}</h5>
+                          <StarRating rating={product.rating} />
+                          <p className="card-text">Price: ₦{product.price}</p>
+                        </div>
+                      </div>
+                    </Link>
                   </div>
-                  </Link>
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </div>
